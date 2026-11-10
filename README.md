@@ -22,13 +22,14 @@ python3 -m http.server 8000
 ## 構成
 - `index.html` … 画面・UI・スタイル
 - `js/main.js` … 描画ループ、ポストエフェクト、移動・衝突判定、エリア遷移（バージョン表記もここ）
-- `js/zones.js` … 各エリア（プール／キノコの庭／草原／廊下）
+- `js/zones.js` … エリア0〜3（プール／キノコの庭／草原／廊下）と共通部品
+- `js/zones2.js` … エリア4〜6（子ども部屋／雲の上の遊び場／閉店後のモール）
 - `js/textures.js` … キャンバスで生成するテクスチャ
 - `js/audio.js` … Web Audio による環境音・効果音
 - `js/ui.js` … メッセージ表示（崩れた大文字小文字）
 - `js/controls.js` … キーボード・マウス・タッチ操作
 - `vendor/three.module.min.js` … three.js r170（MIT License）
 
-デバッグ用：`?zone=0〜3` を URL に付けるとそのエリアから開始します。
+デバッグ用：`?zone=0〜6` を URL に付けるとそのエリアから開始します。
 
 更新履歴は [CHANGELOG.md](CHANGELOG.md) を参照。

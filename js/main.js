@@ -1,13 +1,17 @@
 // DReAmD メイン：描画・ポストエフェクト・プレイヤー移動・ゾーン遷移
 import * as THREE from '../vendor/three.module.min.js';
-import { ZONES } from './zones.js';
+import { poolZone, mushroomZone, fieldZone, hallwayZone } from './zones.js';
+import { bedroomZone, playgroundZone, mallZone } from './zones2.js';
+
+// エリアの並び（最後のモールを抜けるとプールへ戻る）
+const ZONES = [poolZone, mushroomZone, fieldZone, hallwayZone, bedroomZone, playgroundZone, mallZone];
 import { UI } from './ui.js';
 import { DreamAudio } from './audio.js';
 import { Controls } from './controls.js';
 
 // ゲーム内に表示するバージョンと更新日時（CHANGELOG.md と合わせる）
-export const VERSION = '0.1.0';
-export const UPDATED = '2026-11-10 14:30 JST';
+export const VERSION = '0.2.0';
+export const UPDATED = '2026-11-10 19:20 JST';
 
 const canvas = document.getElementById('c');
 document.getElementById('ver').textContent = `DReAmD v${VERSION} · ${UPDATED}`;
@@ -234,7 +238,7 @@ document.addEventListener('visibilitychange', () => {
 // ---- デバッグ用（?zone=2 で直接開始） ----
 const qs = new URLSearchParams(location.search);
 const startZone = Math.min(ZONES.length - 1, Math.max(0, parseInt(qs.get('zone') || '0', 10) || 0));
-window.__dreamd = { g, player, goto: (i) => loadZone(i), begin, get zone() { return zone; }, get busy() { return !!transition; } };
+window.__dreamd = { g, player, goto: (i) => loadZone(i), begin, get zone() { return zone; }, get busy() { return !!transition; }, get fade() { return postMat.uniforms.uFade.value; }, get time() { return zoneTime; } };
 
 loadZone(startZone);
 
@@ -251,7 +255,6 @@ function frame() {
     // タイトル画面：ゆっくり見回す
     player.yaw = Math.sin(time * 0.1) * 0.5;
     player.pitch = Math.sin(time * 0.13) * 0.06 + 0.05;
-    postMat.uniforms.uFade.value = Math.max(0, postMat.uniforms.uFade.value - dt * 0.5);
   } else if (!paused) {
     controls.update();
     const look = controls.consumeLook();
@@ -291,6 +294,9 @@ function frame() {
       glitchSpike = Math.max(glitchSpike, 0.3);
     }
   }
+
+  // 起動時の白いフェードを晴らす（開始ボタンを早く押しても残らないように）
+  if (!transition) postMat.uniforms.uFade.value = Math.max(0, postMat.uniforms.uFade.value - dt * 0.5);
 
   // 場面転換（白く溶ける）
   if (transition) {

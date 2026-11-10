@@ -6,14 +6,14 @@ import {
   carpetTexture, portraitTexture, sunFaceTexture, buildingTexture, makeStatic, skyMaterial,
 } from './textures.js';
 
-const lambert = (color, map = null, extra = {}) => new THREE.MeshLambertMaterial({ color, map, ...extra });
-const basic = (color, extra = {}) => new THREE.MeshBasicMaterial({ color, ...extra });
+export const lambert = (color, map = null, extra = {}) => new THREE.MeshLambertMaterial({ color, map, ...extra });
+export const basic = (color, extra = {}) => new THREE.MeshBasicMaterial({ color, ...extra });
 
-function plane(w, h, mat) { return new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); }
-function box(w, h, d, mat) { return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); }
+export function plane(w, h, mat) { return new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); }
+export function box(w, h, d, mat) { return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); }
 
 // 細長すぎる「誰か」
-function makeFigure() {
+export function makeFigure() {
   const g = new THREE.Group();
   const m = basic('#050608');
   const body = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.26, 2.7, 10), m);
@@ -28,7 +28,7 @@ function makeFigure() {
 }
 
 // 見られる・近づかれると消える存在
-class Watcher {
+export class Watcher {
   constructor(parent, { vanishDist = 9, lookTime = 2.5 } = {}) {
     this.obj = makeFigure();
     this.obj.visible = false;
@@ -59,7 +59,7 @@ class Watcher {
 }
 
 // 一度だけ発火するトリガー
-function once() {
+export function once() {
   const fired = new Set();
   return (key) => { if (fired.has(key)) return false; fired.add(key); return true; };
 }
@@ -661,11 +661,9 @@ export function hallwayZone(g) {
         applyLoop();
       }
       if (loop === 3 && p.z < z1 + 1.3 && trig('exit')) {
-        g.dreamCount++;
-        g.goto(0);
+        g.goto(4); // 子ども部屋へ
       }
     },
   };
 }
 
-export const ZONES = [poolZone, mushroomZone, fieldZone, hallwayZone];

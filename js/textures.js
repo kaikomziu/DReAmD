@@ -239,3 +239,103 @@ export function skyMaterial(top, bottom, exponent = 1.0) {
       }`,
   });
 }
+
+// ===== v0.2.0 で追加したテクスチャ =====
+
+// 木の床板
+export function woodTexture(rx = 1, ry = 1) {
+  const S = 256;
+  const [c, ctx] = canvas(S, S);
+  for (let i = 0; i < 8; i++) {
+    const l = 52 + Math.random() * 10;
+    ctx.fillStyle = `hsl(30,35%,${l}%)`;
+    ctx.fillRect(0, i * 32, S, 32);
+    ctx.strokeStyle = 'rgba(60,35,20,0.18)';
+    for (let k = 0; k < 6; k++) {
+      ctx.beginPath();
+      const y = i * 32 + 4 + Math.random() * 24;
+      ctx.moveTo(0, y);
+      ctx.bezierCurveTo(S * 0.3, y + (Math.random() - 0.5) * 6, S * 0.6, y + (Math.random() - 0.5) * 6, S, y);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(40,20,10,0.5)';
+    ctx.fillRect(0, i * 32, S, 1.5);
+    ctx.fillRect(((i * 97) % S), i * 32, 1.5, 32);
+  }
+  return toTex(c, rx, ry);
+}
+
+// 雲柄の壁紙（子ども部屋）
+export function cloudWallpaperTexture() {
+  const S = 256;
+  const [c, ctx] = canvas(S, S);
+  ctx.fillStyle = '#a9cbe3'; ctx.fillRect(0, 0, S, S);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  const cloud = (x, y, s) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 10 * s, 0, Math.PI * 2);
+    ctx.arc(x + 12 * s, y - 6 * s, 13 * s, 0, Math.PI * 2);
+    ctx.arc(x + 26 * s, y, 10 * s, 0, Math.PI * 2);
+    ctx.rect(x, y, 26 * s, 10 * s);
+    ctx.fill();
+  };
+  cloud(30, 60, 1.2); cloud(150, 40, 1); cloud(90, 150, 1.4); cloud(190, 200, 1.1); cloud(10, 225, 0.9);
+  jitter(ctx, S, S, 0.05, 400);
+  return toTex(c);
+}
+
+// 文字の書かれた積み木
+export function blockTexture(letter, color) {
+  const S = 128;
+  const [c, ctx] = canvas(S, S);
+  ctx.fillStyle = color; ctx.fillRect(0, 0, S, S);
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 8; ctx.strokeRect(8, 8, S - 16, S - 16);
+  ctx.fillStyle = '#fffaf0';
+  ctx.font = 'bold 84px "Times New Roman", serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(letter, S / 2, S / 2 + 6);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+// 遊び場のゴムマット
+export function matTexture(rx, ry) {
+  const S = 128;
+  const [c, ctx] = canvas(S, S);
+  const cols = ['#d8667a', '#5fb8b0', '#e9c46a', '#8a8fd8'];
+  for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) {
+    ctx.fillStyle = cols[(x + y * 2) % 4];
+    ctx.fillRect(x * 64, y * 64, 64, 64);
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2;
+  ctx.strokeRect(0, 0, 64, 64); ctx.strokeRect(64, 64, 64, 64);
+  jitter(ctx, S, S, 0.12, 800);
+  return toTex(c, rx, ry);
+}
+
+// 閉まったシャッター
+export function shutterTexture() {
+  const S = 128;
+  const [c, ctx] = canvas(S, S);
+  for (let y = 0; y < S; y += 8) {
+    const g = ctx.createLinearGradient(0, y, 0, y + 8);
+    g.addColorStop(0, '#b9b7b0'); g.addColorStop(0.6, '#8f8d87'); g.addColorStop(1, '#6d6b66');
+    ctx.fillStyle = g; ctx.fillRect(0, y, S, 8);
+  }
+  jitter(ctx, S, S, 0.1, 400);
+  return toTex(c, 1, 2);
+}
+
+// 光る看板の文字
+export function signTexture(text, fg = '#ffe9c8', bg = '#2a2420') {
+  const W = 512, H = 96;
+  const [c, ctx] = canvas(W, H);
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = fg;
+  ctx.shadowColor = fg; ctx.shadowBlur = 12;
+  ctx.font = 'bold 48px "Times New Roman", serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, W / 2, H / 2 + 3);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
