@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>DReAmD</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; color: #eef; overscroll-behavior: none; }
+  body { font-family: "Courier New", Courier, monospace; user-select: none; -webkit-user-select: none; touch-action: none; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+  /* メッセージ */
+  #msg {
+    position: fixed; left: 50%; bottom: max(14%, calc(env(safe-area-inset-bottom) + 90px)); transform: translateX(-50%);
+    width: min(90vw, 760px); text-align: center;
+    font-size: clamp(15px, 2.4vw, 24px); letter-spacing: 0.08em; line-height: 1.5;
+    color: #f4fff9; text-shadow: 0 0 6px rgba(180,255,230,0.6), 0 0 1px #000, 2px 0 rgba(255,80,120,0.35), -2px 0 rgba(80,200,255,0.35);
+    opacity: 0; transition: opacity 0.8s; pointer-events: none; white-space: pre-wrap;
+  }
+  @media (pointer: coarse) { #msg { bottom: 30%; } }
+  #zoneTitle {
+    position: fixed; left: 50%; top: 22%; transform: translateX(-50%);
+    font-family: "Times New Roman", Times, serif; font-style: italic;
+    font-size: clamp(22px, 5vw, 46px); letter-spacing: 0.2em; color: rgba(255,255,255,0.0);
+    text-shadow: 0 0 12px rgba(255,255,255,0.0); pointer-events: none; white-space: nowrap;
+  }
+  #zoneTitle.show { animation: zt 6s ease-in-out forwards; }
+  @keyframes zt {
+    0% { color: rgba(255,255,255,0); letter-spacing: 0.5em; }
+    25% { color: rgba(255,255,255,0.75); text-shadow: 0 0 14px rgba(255,255,255,0.6); }
+    70% { color: rgba(255,255,255,0.55); }
+    100% { color: rgba(255,255,255,0); letter-spacing: 0.1em; }
+  }
+  #flash {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    font-family: "Times New Roman", serif; font-size: clamp(60px, 18vw, 220px); color: #fff; mix-blend-mode: difference;
+    opacity: 0; pointer-events: none; font-weight: bold;
+  }
+
+  /* タイトル */
+  .overlay {
+    position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2.2em; text-align: center; padding: 24px; cursor: pointer;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.15), rgba(0,0,0,0.7));
+  }
+  .hidden { display: none !important; }
+  #logo {
+    font-family: "Times New Roman", Times, serif; font-size: clamp(56px, 15vw, 150px); letter-spacing: 0.06em;
+    color: #f2fff8; text-shadow: 0 0 20px rgba(160,255,230,0.6), 4px 0 rgba(255,60,120,0.45), -4px 0 rgba(60,200,255,0.45);
+    animation: wob 7s ease-in-out infinite;
+  }
+  @keyframes wob {
+    0%,100% { transform: skewX(0deg) scale(1); filter: blur(0px); }
+    48% { transform: skewX(0deg) scale(1.01); filter: blur(0.4px); }
+    50% { transform: skewX(-6deg) scale(1.03); filter: blur(1.5px); }
+    52% { transform: skewX(2deg) scale(1); filter: blur(0px); }
+  }
+  .sub { font-size: clamp(14px, 2.6vw, 20px); letter-spacing: 0.25em; color: #dff; animation: blink 2.4s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0.35; } }
+  .help { font-size: clamp(11px, 1.8vw, 14px); letter-spacing: 0.15em; color: rgba(230,255,250,0.7); line-height: 2; }
+  .warn { font-size: clamp(10px, 1.6vw, 12px); color: rgba(255,220,230,0.55); letter-spacing: 0.1em; }
+
+  /* スマホ用スティック */
+  #stickBase {
+    position: fixed; width: 120px; height: 120px; border-radius: 50%; display: none; pointer-events: none;
+    border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); transform: translate(-50%,-50%);
+  }
+  #stickKnob {
+    position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(255,255,255,0.28); transform: translate(-50%,-50%);
+  }
+  #ver {
+    position: fixed; right: calc(8px + env(safe-area-inset-right)); bottom: calc(6px + env(safe-area-inset-bottom));
+    font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; pointer-events: none;
+  }
+  #err { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; text-align: center; padding: 20px; font-size: 16px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="msg"></div>
+<div id="zoneTitle"></div>
+<div id="flash"></div>
+<div id="stickBase"><div id="stickKnob"></div></div>
+
+<div id="start" class="overlay">
+  <div id="logo">DReAmD</div>
+  <div class="sub" id="startSub">cLiCk tO fALL aSLeEp</div>
+  <div class="help" id="help">wAsD tO wALk · mOuSE tO lOoK · sHiFT iS nOT fASTer<br>eSc tO wAKE uP (yOU wILL nOT)</div>
+  <div class="warn">hEADphONES rEcOMmeNDeD · fLAsHinG lIGHts</div>
+</div>
+<div id="pause" class="overlay hidden">
+  <div class="sub">yOU aRE sTiLL aSLeEP</div>
+  <div class="help">cLiCK tO cONTINUe dREAMing</div>
+</div>
+<div id="err">wEBgl iS nOT aVAILAbLE. tHE dREAM cANNOT lOAD.<br>(WebGL非対応のブラウザです)</div>
+<div id="ver"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
